@@ -2,7 +2,7 @@ import Light from "./Light.jsx";
 import React, { useState, useEffect } from "react";
 import mqtt from "mqtt";
 
-const lightDurations = [20, 30, 6];
+const lightDurations = [50, 30, 6];
 var listenerAdded = false;
 const client = mqtt.connect('mqtt://192.168.122.75:8083');
 // client.setMaxListeners(3);
@@ -27,6 +27,7 @@ const TrafficLight = ({ initialValue }) => {
     const [colorIndex, setColorIndex] = useState(initialValue);
     const [seconds, setSeconds] = useState(lightDurations[initialValue]);
     const [waiting, setWaiting] = useState(false);
+    const [fastYellow, setFastYellow] = useState(false);
 
     const update_mqtt = () => {
         if(!listenerAdded){
@@ -49,21 +50,30 @@ const TrafficLight = ({ initialValue }) => {
 
         const timer = setInterval(() => {
 
-            if (seconds > 10) {
+            if (seconds > 5) {
+                var num = seconds;
                 if (waiting && colorIndex === 1) {
-                    var num = seconds;
                     if (num % 2 !== 0) {
                         num = num - 1
                     }
                     setSeconds(num / 2);
                     setWaiting(false);
+                    setFastYellow(true);
                     console.log(seconds);
-                } else {
+                } else if (fastYellow && colorIndex === 2){
+                    if (num % 2 !== 0) {
+                        num = num - 1
+                    }
+                    setSeconds(num / 2);
+                    setFastYellow(false);
+                    console.log(seconds);
+                }
+                 else {
                     setSeconds(seconds - 1);
                     console.log(seconds);
                 }
             }
-            if (seconds > 0 && seconds <= 10) {
+            if (seconds > 0 && seconds <= 5) {
                 setSeconds(seconds - 1);
                 console.log(seconds);
             }
